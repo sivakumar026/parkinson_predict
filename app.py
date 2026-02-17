@@ -3,6 +3,8 @@ import numpy as np
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+
 
 app = FastAPI()
 
@@ -14,6 +16,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+@app.get("/", response_class=HTMLResponse)
+def home():
+    return open("index.html").read()
 
 # -----------------------------
 # Load model & scaler (ONCE)
