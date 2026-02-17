@@ -14,6 +14,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+@app.get("/", response_class=HTMLResponse)
+def home():
+    return open("index.html").read()
 
 # -----------------------------
 # Load model & scaler (ONCE)
