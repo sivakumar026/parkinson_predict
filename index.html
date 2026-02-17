@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Parkinson’s Disease Prediction</title>
+
+<style>
+:root {
+  --primary: #6366f1;
+  --secondary: #22c55e;
+  --danger: #ef4444;
+  --bg: #0f172a;
+  --card: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  font-family: "Segoe UI", sans-serif;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  width: 900px;
+  padding: 30px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+p {
+  text-align: center;
+  color: #cbd5f5;
+  margin-bottom: 30px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.field label {
+  font-size: 13px;
+  color: #c7d2fe;
+}
+
+.field input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.3);
+  color: white;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+button {
+  margin-top: 25px;
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, var(--primary), #818cf8);
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(99,102,241,0.5);
+}
+
+#result {
+  margin-top: 25px;
+  padding: 15px;
+  text-align: center;
+  font-size: 22px;
+  border-radius: 12px;
+  display: none;
+}
+
+.success {
+  background: rgba(34,197,94,0.15);
+  color: var(--secondary);
+}
+
+.error {
+  background: rgba(239,68,68,0.15);
+  color: var(--danger);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>Parkinson’s Disease Prediction</h1>
+  <p>AI-powered clinical decision support</p>
+
+  <form id="predictForm">
+    <div class="grid" id="fields"></div>
+
+    <button type="submit">Predict</button>
+  </form>
+
+  <div id="result"></div>
+</div>
+
+<script>
+const fields = [
+  "MDVP_Fo_Hz","MDVP_Fhi_Hz","MDVP_Flo_Hz","MDVP_Jitter_percent",
+  "MDVP_Jitter_Abs","MDVP_RAP","MDVP_PPQ","Jitter_DDP",
+  "MDVP_Shimmer","MDVP_Shimmer_dB","Shimmer_APQ3","Shimmer_APQ5",
+  "MDVP_APQ","Shimmer_DDA","NHR","HNR","RPDE","DFA",
+  "spread1","spread2","D2","PPE"
+];
+
+const fieldsDiv = document.getElementById("fields");
+
+fields.forEach(f => {
+  fieldsDiv.innerHTML += `
+    <div class="field">
+      <label>${f}</label>
+      <input type="number" step="any" name="${f}" required>
+    </div>
+  `;
+});
+
+document.getElementById("predictForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const data = {};
+  new FormData(e.target).forEach((v, k) => data[k] = Number(v));
+
+  const response = await fetch("http://127.0.0.1:8000/predict", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(data)
+  });
+
+  const result = await response.json();
+
+  const resultDiv = document.getElementById("result");
+  resultDiv.style.display = "block";
+
+  if (result.prediction === 1) {
+    resultDiv.className = "error";
+    resultDiv.innerText = "⚠ Parkinson’s Disease Detected";
+  } else {
+    resultDiv.className = "success";
+    resultDiv.innerText = "✅ Healthy (No Parkinson’s Detected)";
+  }
+});
+</script>
+
+</body>
+</html>
